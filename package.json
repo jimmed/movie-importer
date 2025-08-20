@@ -1,0 +1,17 @@
+{
+  "name": "movie-importer",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "listr2": "^9.0.1",
+    "wretch": "^2.11.0",
+    "zod": "^4.0.17"
+  }
+}

@@ -33,9 +33,9 @@ export async function addMediaToNotion(
         Genre: {
           multi_select: item.genres.map((item) => ({ name: item.name })),
         },
-        IMDB: {
-          url: item.imdb_id ? `https://imdb.com/title/${item.imdb_id}` : "",
-        },
+        IMDB: item.imdb_id
+          ? { url: `https://imdb.com/title/${item.imdb_id}` }
+          : undefined,
         Rating: { number: item.vote_average },
         Type: {
           select: { name: item.media_type === "tv" ? "TV Series" : "Movie" },

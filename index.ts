@@ -79,6 +79,7 @@ if (posterImage) console.log(` -> Poster: ${posterImage}`);
 const genres = mediaDetails.genres.map((g) => g.name).join(", ");
 if (genres) console.log(` -> Genres: ${genres}`);
 
-const response = await addMediaToNotion(mediaDetails);
+console.log(`\nAdding to Notion...`);
 
-console.log(response);
+const response = await addMediaToNotion(mediaDetails);
+console.log(` -> Page URL: ${response.url}`);

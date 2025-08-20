@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { addMediaToNotion } from "./lib/notion/api";
 import { getMediaDetails, searchForMedia } from "./lib/tmdb/api";
 
 const query = Bun.argv.slice(Bun.argv.indexOf(import.meta.path) + 1).join(" ");
@@ -52,8 +53,11 @@ if (result.media_type === "movie") {
   }
 }
 
-const mediaDetails = await getMediaDetails(result);
+if (result.overview) {
+  console.log(`\n${result.overview}\n`);
+}
 
+const mediaDetails = await getMediaDetails(result);
 const director = mediaDetails.credits.crew.find(
   (crew) => crew.job === "Director"
 );
@@ -74,3 +78,7 @@ if (posterImage) console.log(` -> Poster: ${posterImage}`);
 
 const genres = mediaDetails.genres.map((g) => g.name).join(", ");
 if (genres) console.log(` -> Genres: ${genres}`);
+
+const response = await addMediaToNotion(mediaDetails);
+
+console.log(response);

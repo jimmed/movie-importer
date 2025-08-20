@@ -34,7 +34,7 @@ const TvSearchResult = NamedEntity.extend({
   original_language: OriginalLanguage,
   original_name: z.string().nullish(),
   overview: z.string(),
-  poster_path: ImagePath,
+  poster_path: ImagePath.nullable(),
   genre_ids: z.array(z.number().int()),
   popularity: NumberDefault0,
   video: BooleanDefaultTrue,
@@ -109,7 +109,16 @@ const AppendedCredits = z.object({
 
 export const GetMovieDetailsResponse = BaseEntity.extend({
   backdrop_path: ImagePath.nullable(),
-  belongs_to_collection: z.string().nullable(),
+  belongs_to_collection: z
+    .string()
+    .transform((name) => ({ id: 0, name }))
+    .or(
+      NamedEntity.extend({
+        poster_path: ImagePath.nullish(),
+        backdrop_path: ImagePath.nullish(),
+      })
+    )
+    .nullable(),
   budget: IntDefault0,
   genres: z.array(Genre),
   homepage: z.string(),
@@ -118,7 +127,7 @@ export const GetMovieDetailsResponse = BaseEntity.extend({
   original_title: z.string(),
   overview: z.string(),
   popularity: NumberDefault0,
-  poster_path: ImagePath,
+  poster_path: ImagePath.nullable(),
   production_companies: z.array(ProductionCompany),
   production_countries: z.array(ProductionCountry),
   release_date: OptionalDate,
@@ -131,7 +140,9 @@ export const GetMovieDetailsResponse = BaseEntity.extend({
   video: BooleanDefaultTrue,
   vote_average: NumberDefault0,
   vote_count: IntDefault0,
-}).extend(AppendedCredits.shape);
+})
+  .extend(AppendedCredits.shape)
+  .transform((movie) => ({ ...movie, media_type: "movie" as const }));
 
 export const GetTvSeriesDetailsResponse = NamedEntity.extend({
   backdrop_path: ImagePath,
@@ -140,6 +151,7 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
   first_air_date: z.iso.date(),
   genres: z.array(Genre),
   homepage: z.string(),
+  imdb_id: z.string(),
   in_production: BooleanDefaultTrue,
   languages: z.array(z.string()),
   last_air_date: z.iso.date().nullable(),
@@ -169,7 +181,7 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
   original_name: z.string(),
   overview: z.string(),
   popularity: NumberDefault0,
-  poster_path: ImagePath,
+  poster_path: ImagePath.nullable(),
   production_companies: z.array(ProductionCompany),
   production_countries: z.array(ProductionCountry),
   seasons: z.array(
@@ -177,7 +189,7 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
       air_date: z.iso.date().nullable(),
       episode_count: IntDefault0,
       overview: z.string(),
-      poster_path: ImagePath,
+      poster_path: ImagePath.nullable(),
       season_number: IntDefault0,
       vote_average: NumberDefault0,
     })
@@ -188,4 +200,11 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
   type: z.string(),
   vote_average: NumberDefault0,
   vote_count: NumberDefault0,
-}).extend(AppendedCredits.shape);
+})
+  .extend(AppendedCredits.shape)
+  .transform((series) => ({ ...series, media_type: "tv" as const }));
+
+export const GetMediaDetailsResponse = z.discriminatedUnion("media_type", [
+  GetTvSeriesDetailsResponse,
+  GetMovieDetailsResponse,
+]);

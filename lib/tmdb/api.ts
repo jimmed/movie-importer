@@ -3,6 +3,7 @@ import queryString from "wretch/addons/queryString";
 import {
   GetMovieDetailsResponse,
   GetTvSeriesDetailsResponse,
+  GetCollectionDetailsResponse,
   SearchForMediaResponse,
   MediaSearchResult,
 } from "./schema";
@@ -19,7 +20,7 @@ export function searchForMedia(query: string) {
     .url("/search/multi")
     .query({ query, language: "en-GB" })
     .get()
-    .json(SearchForMediaResponse.parse);
+    .json((v) => SearchForMediaResponse.parse(v));
 }
 
 export function getMovieDetails(movieId: number) {
@@ -38,6 +39,14 @@ export function getTvSeriesDetails(tvSeriesId: number) {
     .json(GetTvSeriesDetailsResponse.parse);
 }
 
+export function getCollectionDetails(collectionId: number) {
+  return tmdb
+    .url(`/collection/${collectionId}`)
+    .query({ language: "en-GB" })
+    .get()
+    .json(GetCollectionDetailsResponse.parse);
+}
+
 export function getMediaDetails({
   media_type,
   id,
@@ -47,6 +56,8 @@ export function getMediaDetails({
       return getMovieDetails(id);
     case "tv":
       return getTvSeriesDetails(id);
+    case "collection":
+      return getCollectionDetails(id);
     default:
       throw new Error(`Unsupported media type "${media_type}"`);
   }

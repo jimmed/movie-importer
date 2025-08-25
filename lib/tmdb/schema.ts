@@ -62,9 +62,19 @@ const MovieSearchResult = BaseEntity.extend({
   vote_average: NumberDefault0,
   vote_count: IntDefault0,
 });
+const CollectionSearchResult = BaseEntity.extend({
+  media_type: z.literal("collection"),
+  backdrop_path: ImagePath.nullable(),
+  title: z.string().optional(),
+  original_language: z.string().optional(),
+  original_title: z.string().optional(),
+  overview: z.string().optional(),
+  poster_path: ImagePath.nullish(),
+});
 export const MediaSearchResult = z.discriminatedUnion("media_type", [
   TvSearchResult,
   MovieSearchResult,
+  CollectionSearchResult,
   z.object({ media_type: z.literal("person"), id: IntDefault0 }),
 ]);
 export type MediaSearchResultItem = z.infer<typeof MediaSearchResult>;
@@ -101,14 +111,14 @@ const AppendedCredits = z.object({
         cast_id: IntDefault0,
         character: z.string(),
         order: IntDefault0,
-      }),
+      })
     ),
     crew: z.array(
       CreditedPerson.extend({
         credit_id: z.string(),
         department: z.string(),
         job: z.string(),
-      }),
+      })
     ),
   }),
 });
@@ -122,7 +132,7 @@ export const GetMovieDetailsResponse = BaseEntity.extend({
       NamedEntity.extend({
         poster_path: ImagePath.nullish(),
         backdrop_path: ImagePath.nullish(),
-      }),
+      })
     )
     .nullable(),
   budget: IntDefault0,
@@ -178,7 +188,7 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
     NamedEntity.extend({
       logo_path: ImagePath,
       origin_country: z.string(),
-    }),
+    })
   ),
   number_of_episodes: IntDefault0,
   number_of_seasons: IntDefault0,
@@ -198,7 +208,7 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
       poster_path: ImagePath.nullable(),
       season_number: IntDefault0,
       vote_average: NumberDefault0,
-    }),
+    })
   ),
   spoken_languages: z.array(SpokenLanguage),
   status: z.string(),
@@ -210,9 +220,19 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
   .extend(AppendedCredits.shape)
   .transform((series) => ({ ...series, media_type: "tv" as const }));
 
+export const GetCollectionDetailsResponse = NamedEntity.extend({
+  overview: z.string(),
+  poster_path: ImagePath.nullable(),
+  backdrop_path: ImagePath.nullable(),
+}).transform((collection) => ({
+  ...collection,
+  media_type: "collection" as const,
+}));
+
 export const GetMediaDetailsResponse = z.discriminatedUnion("media_type", [
   GetTvSeriesDetailsResponse,
   GetMovieDetailsResponse,
+  GetCollectionDetailsResponse,
 ]);
 
 export type MediaDetails = z.infer<typeof GetMediaDetailsResponse>;

@@ -3,13 +3,14 @@ import { ListrInquirerPromptAdapter } from "@listr2/prompt-adapter-inquirer";
 import { Listr } from "listr2";
 import { getMediaDetails, searchForMedia } from "./tmdb/api";
 import type { MediaDetails, MediaSearchResultItem } from "./tmdb/schema";
-import { addMediaToNotion } from "./notion/api";
+import { addMediaToNotion, uploadImageToNotion } from "./notion/api";
 
 export function run(query = "") {
   return new Listr<{
     query: string;
     selected?: MediaSearchResultItem;
     details?: MediaDetails;
+    posterImageId?: string;
   }>([
     {
       title: "Select a film or TV series",
@@ -28,7 +29,9 @@ export function run(query = "") {
         });
 
         ctx.selected = result as MediaSearchResultItem;
-        task.title = `Selected: ${formatSearchResultForPrompt(ctx.selected).short}`;
+        task.title = `Selected: ${
+          formatSearchResultForPrompt(ctx.selected).short
+        }`;
       },
     },
     {
@@ -38,9 +41,20 @@ export function run(query = "") {
       },
     },
     {
+      title: "Upload poster image to Notion",
+      enabled: (ctx) => !!ctx.details?.poster_path,
+      task: async (ctx) => {
+        if (ctx.details?.poster_path) {
+          ctx.posterImageId = await uploadImageToNotion(
+            ctx.details.poster_path
+          );
+        }
+      },
+    },
+    {
       title: "Add to Notion",
       task: async (ctx) => {
-        await addMediaToNotion(ctx.details!);
+        await addMediaToNotion(ctx.details!, ctx.posterImageId);
       },
     },
   ]).run({ query });
@@ -48,7 +62,7 @@ export function run(query = "") {
 
 function formatSearchResultForPrompt(item: MediaSearchResultItem) {
   switch (item.media_type) {
-    case "movie":
+    case "movie": {
       const title = `🎥 ${item.title}${
         item.original_title !== item.title
           ? ` [${item.original_title} in ${item.original_language?.name}]`
@@ -60,13 +74,27 @@ function formatSearchResultForPrompt(item: MediaSearchResultItem) {
         description: item.overview,
         short: title,
       };
-    case "tv":
+    }
+
+    case "tv": {
       const name = `📺 ${item.name}${
-        item.original_name !== item.name
-          ? ` [${item.original_name} in ${item.original_language?.name}]`
-          : ""
+        item.original_name !== item.name ? ` [${item.original_name}}]` : ""
       }${item.first_air_date ? ` (${item.first_air_date.getFullYear()})` : ""}`;
       return { value: item, name, description: item.overview, short: name };
+    }
+
+    case "collection": {
+      const title = `📁 ${item.title}${
+        item.original_title !== item.title ? ` [${item.original_title}]` : ""
+      }`;
+      return {
+        value: item,
+        name: title,
+        description: item.overview,
+        short: title,
+      };
+    }
   }
+
   throw new Error("Unable to format search result");
 }

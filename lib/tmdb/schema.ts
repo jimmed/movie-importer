@@ -95,14 +95,14 @@ const AppendedCredits = z.object({
         cast_id: IntDefault0,
         character: z.string(),
         order: IntDefault0,
-      })
+      }),
     ),
     crew: z.array(
       CreditedPerson.extend({
         credit_id: z.string(),
         department: z.string(),
         job: z.string(),
-      })
+      }),
     ),
   }),
 });
@@ -116,7 +116,7 @@ export const GetMovieDetailsResponse = BaseEntity.extend({
       NamedEntity.extend({
         poster_path: ImagePath.nullish(),
         backdrop_path: ImagePath.nullish(),
-      })
+      }),
     )
     .nullable(),
   budget: IntDefault0,
@@ -162,17 +162,17 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
     air_date: z.iso.date(),
     episode_number: IntDefault0,
     production_code: z.string(),
-    runtime: IntDefault0,
+    runtime: IntDefault0.nullable(),
     season_number: IntDefault0,
     show_id: IntDefault0,
-    still_path: ImagePath,
+    still_path: ImagePath.nullable(),
   }),
   next_episode_to_air: z.string().nullable(),
   networks: z.array(
     NamedEntity.extend({
       logo_path: ImagePath,
       origin_country: z.string(),
-    })
+    }),
   ),
   number_of_episodes: IntDefault0,
   number_of_seasons: IntDefault0,
@@ -192,7 +192,7 @@ export const GetTvSeriesDetailsResponse = NamedEntity.extend({
       poster_path: ImagePath.nullable(),
       season_number: IntDefault0,
       vote_average: NumberDefault0,
-    })
+    }),
   ),
   spoken_languages: z.array(SpokenLanguage),
   status: z.string(),

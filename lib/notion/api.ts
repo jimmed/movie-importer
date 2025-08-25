@@ -47,7 +47,14 @@ export async function addMediaToNotion(
     .url("/pages")
     .json({
       parent: { database_id: IMPORTER_NOTION_DB },
-      icon: { emoji: item.media_type === "tv" ? "📺" : "🎥" },
+      icon: {
+        emoji:
+          item.media_type === "tv"
+            ? "📺"
+            : item.media_type === "movie"
+            ? "🎥"
+            : "📁",
+      },
       cover: item.backdrop_path
         ? { external: { url: item.backdrop_path } }
         : undefined,

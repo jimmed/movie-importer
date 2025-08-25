@@ -4,7 +4,11 @@ import ISO6391 from "iso-639-1";
 const IntDefault0 = z.number().int().default(0);
 const NumberDefault0 = z.number().default(0);
 const BooleanDefaultTrue = z.boolean().default(true);
-const OptionalDate = z.iso.date().or(z.literal("")).optional();
+const OptionalDate = z.iso
+  .date()
+  .transform((v) => new Date(v))
+  .or(z.literal("").transform(() => undefined))
+  .optional();
 const OriginalLanguage = z
   .string()
   .transform((value) => ({ iso_639_1: value, name: ISO6391.getName(value) }))
@@ -39,9 +43,10 @@ const TvSearchResult = NamedEntity.extend({
   popularity: NumberDefault0,
   video: BooleanDefaultTrue,
   vote_average: NumberDefault0,
-  first_air_date: z.iso.date(),
+  first_air_date: OptionalDate,
   origin_country: z.array(z.string()),
 });
+
 const MovieSearchResult = BaseEntity.extend({
   media_type: z.literal("movie"),
   backdrop_path: ImagePath.nullish(),
@@ -56,12 +61,13 @@ const MovieSearchResult = BaseEntity.extend({
   video: BooleanDefaultTrue,
   vote_average: NumberDefault0,
   vote_count: IntDefault0,
-}).loose();
+});
 export const MediaSearchResult = z.discriminatedUnion("media_type", [
   TvSearchResult,
   MovieSearchResult,
-  z.object({ media_type: z.literal("person") }).loose(),
+  z.object({ media_type: z.literal("person") }),
 ]);
+export type MediaSearchResultItem = z.infer<typeof MediaSearchResult>;
 
 export const SearchForMediaResponse = z.object({
   page: IntDefault0,
@@ -208,3 +214,5 @@ export const GetMediaDetailsResponse = z.discriminatedUnion("media_type", [
   GetTvSeriesDetailsResponse,
   GetMovieDetailsResponse,
 ]);
+
+export type MediaDetails = z.infer<typeof GetMediaDetailsResponse>;

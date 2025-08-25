@@ -12,7 +12,7 @@ export function run(query = "") {
     details?: MediaDetails;
   }>([
     {
-      title: "Find a film/series",
+      title: "Select a film or TV series",
       task: async (ctx, task) => {
         const prompt = task.prompt(ListrInquirerPromptAdapter);
 

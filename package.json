@@ -19,5 +19,8 @@
     "listr2": "^9.0.1",
     "wretch": "^2.11.0",
     "zod": "^4.0.17"
+  },
+  "scripts": {
+    "postinstall": "bun2nix -o bun.nix"
   }
 }

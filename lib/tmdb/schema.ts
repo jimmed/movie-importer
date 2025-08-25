@@ -65,7 +65,7 @@ const MovieSearchResult = BaseEntity.extend({
 export const MediaSearchResult = z.discriminatedUnion("media_type", [
   TvSearchResult,
   MovieSearchResult,
-  z.object({ media_type: z.literal("person") }),
+  z.object({ media_type: z.literal("person"), id: IntDefault0 }),
 ]);
 export type MediaSearchResultItem = z.infer<typeof MediaSearchResult>;
 

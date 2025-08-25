@@ -4,18 +4,20 @@ import z from "zod";
 import type { GetMediaDetailsResponse } from "../tmdb/schema";
 import { UpdatePageResponse } from "./schema";
 
+const { IMPORTER_NOTION_TOKEN, IMPORTER_NOTION_DB } = Bun.env;
+
 const notion = wretch("https://api.notion.com/v1")
-  .auth(`Bearer ${Bun.env.NOTION_TOKEN}`)
+  .auth(`Bearer ${IMPORTER_NOTION_TOKEN}`)
   .headers({ "Notion-Version": "2022-06-28" })
   .addon(queryString);
 
 export async function addMediaToNotion(
-  item: z.infer<typeof GetMediaDetailsResponse>
+  item: z.infer<typeof GetMediaDetailsResponse>,
 ) {
   return notion
     .url("/pages")
     .json({
-      parent: { database_id: Bun.env.NOTION_DATABASE },
+      parent: { database_id: IMPORTER_NOTION_DB },
       icon: { emoji: item.media_type === "tv" ? "📺" : "🎥" },
       cover: item.backdrop_path
         ? { external: { url: item.backdrop_path } }

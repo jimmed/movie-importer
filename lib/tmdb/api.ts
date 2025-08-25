@@ -8,9 +8,11 @@ import {
 } from "./schema";
 import type z from "zod";
 
+const { IMPORTER_TMDB_READ_TOKEN } = Bun.env;
+
 const tmdb = wretch("https://api.themoviedb.org/3/")
   .addon(queryString)
-  .auth(`Bearer ${Bun.env.TMDB_READ_TOKEN}`);
+  .auth(`Bearer ${IMPORTER_TMDB_READ_TOKEN}`);
 
 export function searchForMedia(query: string) {
   return tmdb
